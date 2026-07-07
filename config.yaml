@@ -38,7 +38,7 @@ playids:
   run_max: 0
   gap_min: 15
   gap_max: 45
-  ids: ""              # 示例："1863223323,1958473321,2023341122"
+  ids: "2732559494,2732514039"              # 示例："1863223323,1958473321,2023341122"
   idsFile: ""
   enableMain: true      # 单账号部署时开启主账号播放
   enableSecondaries: false
@@ -103,7 +103,7 @@ musician:
   enableVipNote: true   # 进阶任务中自动发布笔记
   enableVipPlay: true   # 进阶任务中自动完成播放量
   play:
-    ids: ""             # 示例："1863223323,1958473321,2023341122"
+    ids: "2732559494,2732514039"             # 示例："1863223323,1958473321,2023341122"
     idsFile: ""
     run_min: 0
     run_max: 0
