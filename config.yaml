@@ -1,0 +1,111 @@
+version: 1.0
+
+# 账号配置
+# 工作流会在运行时使用 ncmm login 命令把 Secrets 写入 /data/cookie.json
+accounts:
+  main: "/data/cookie.json"
+  secondary: []
+
+log:
+  app: ncm
+  format: text
+  level: info
+  stdout: true          # GitHub Actions 日志中可直接查看
+  rotate:
+    filename: "/data/log/ncm.log"
+    maxsize: 100
+    maxage: 7
+    maxbackups: 3
+    localtime: true
+    compress: false
+
+network:
+  debug: false
+  timeout: 60s
+  retry: 3
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+
+database:
+  driver: badger
+  path: "/data/badger"
+
+# 播放配置
+# 请将 ids 替换为你自己发布的歌曲 ID，多个用逗号分隔
+playids:
+  daily_min: 30
+  daily_max: 80
+  run_min: 0
+  run_max: 0
+  gap_min: 15
+  gap_max: 45
+  ids: ""              # 示例："1863223323,1958473321,2023341122"
+  idsFile: ""
+  enableMain: true      # 单账号部署时开启主账号播放
+  enableSecondaries: false
+
+# 签到任务
+sign:
+  enableMain: true
+  enableSecondaries: false
+  enableVipTask: true
+  yunbeiTask:
+    enableViewVipCenter: true
+    enableLikeComment: true
+    enableListenIndie: true
+    enableReserve: true
+    enableFollowArtist: true
+    enableLikeSong: true
+    enableCollectSong: true
+    enablePublishNote: true
+    enablePlayDailyRecommend: false
+
+# 批量任务入口配置
+task:
+  sign: true
+  playids: true
+  musician-sign: true
+  musician-vip: true    # 黑胶 VIP 进阶任务（发布笔记 + 播放量）
+  note: false
+  fansgroup: false
+
+fansgroup:
+  enableMain: false
+  enableSecondaries: false
+
+# 混听风控干扰
+mixPlay:
+  enabled: true
+  dailyRecommendRatio: 0.3
+  countTarget: false
+
+# 图文笔记配置
+note:
+  titles:
+    - "今日音乐分享"
+    - "音乐人的日常"
+    - "分享好听的歌"
+    - "每日歌单推荐"
+  messages:
+    - "分享一首好听的歌~"
+    - "音乐是最好的陪伴"
+    - "今天也要好好听歌呀"
+    - "用音乐记录生活"
+  imageUrls:
+    - "https://tinyurl.com/mruxfba5"
+  type: 39
+  autoDelete: true      # 发布成功后自动删除，保持主页整洁
+
+# 音乐人任务配置
+musician:
+  enableMain: true
+  enableSecondaries: false
+  identityCacheDays: 0
+  enableVipNote: true   # 进阶任务中自动发布笔记
+  enableVipPlay: true   # 进阶任务中自动完成播放量
+  play:
+    ids: ""             # 示例："1863223323,1958473321,2023341122"
+    idsFile: ""
+    run_min: 0
+    run_max: 0
+    gap_min: 0
+    gap_max: 0
