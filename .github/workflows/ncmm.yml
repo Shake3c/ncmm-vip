@@ -1,0 +1,36 @@
+name: 网易云音乐人黑胶 VIP 自动化
+
+on:
+  schedule:
+    # 每天 UTC 02:00（北京时间 10:00）运行一次
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  ncmm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 配置
+        uses: actions/checkout@v4
+
+      - name: 准备工作目录
+        run: mkdir -p data
+
+      - name: 导入主账号 Cookie
+        env:
+          MUSIC_U: ${{ secrets.MUSIC_U }}
+          CSRF: ${{ secrets.__CSRF }}
+        run: |
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            ghcr.io/3899/ncmm:latest \
+            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF};" \
+            -m -o /data/cookie.json --home /data
+
+      - name: 运行批量任务
+        run: |
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            -v "$PWD/config.yaml:/config.yaml" \
+            ghcr.io/3899/ncmm:latest \
+            -c /config.yaml --home /data task
