@@ -21,11 +21,13 @@ jobs:
           MUSIC_U: ${{ secrets.MUSIC_U }}
           CSRF: ${{ secrets.__CSRF }}
         run: |
+          printf "MUSIC_U=%s; __csrf=%s" "${MUSIC_U}" "${CSRF}" > cookie.txt
           docker run --rm \
             -v "$PWD/data:/data" \
+            -v "$PWD/cookie.txt:/cookie.txt" \
             ghcr.io/3899/ncmm:latest \
-            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF};" \
-            -m -o /data/cookie.json --home /data
+            login cookie --format header -f /cookie.txt -m -o /data/cookie.json --home /data
+
 
       - name: 运行批量任务
         run: |
