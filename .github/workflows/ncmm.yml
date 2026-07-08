@@ -27,6 +27,28 @@ jobs:
             login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF}" \
             -m -o /data/cookie.json --home /data
 
+      - name: 导入小号1 Cookie
+        env:
+          MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
+          CSRF: ${{ secrets.__CSRF_FAN1 }}
+        run: |
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            ghcr.io/3899/ncmm:latest \
+            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF}" \
+            -m -o /data/fan1.json --home /data
+
+      - name: 导入小号2 Cookie
+        env:
+          MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
+          CSRF: ${{ secrets.__CSRF_FAN2 }}
+        run: |
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            ghcr.io/3899/ncmm:latest \
+            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF}" \
+            -m -o /data/fan2.json --home /data
+
       - name: 运行批量任务
         run: |
           docker run --rm \
