@@ -44,21 +44,102 @@ jobs:
           MUSIC_U: ${{ secrets.MUSIC_U }}
           __CSRF: ${{ secrets.__CSRF }}
         run: |
-          echo -n "MUSIC_U=${MUSIC_U}; __csrf=${__CSRF};" > data/cookie.json
+          python3 - <<'PY'
+          import json, os, datetime
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          future = "2099-12-31T23:59:59Z"
+          def entry(name, value, seq):
+              return {
+                  "Name": name,
+                  "Value": value,
+                  "Domain": "music.163.com",
+                  "Path": "/",
+                  "Secure": False,
+                  "HttpOnly": False,
+                  "Persistent": True,
+                  "HostOnly": False,
+                  "Expires": future,
+                  "Creation": now,
+                  "LastAccess": now,
+                  "SeqNum": seq
+              }
+          data = {
+              "music.163.com": {
+                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
+                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
+              }
+          }
+          with open("data/cookie.json", "w") as f:
+              json.dump(data, f)
+          PY
 
       - name: 生成小号1 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
           __CSRF: ${{ secrets.__CSRF_FAN1 }}
         run: |
-          echo -n "MUSIC_U=${MUSIC_U}; __csrf=${__CSRF};" > data/fan1.json
+          python3 - <<'PY'
+          import json, os, datetime
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          future = "2099-12-31T23:59:59Z"
+          def entry(name, value, seq):
+              return {
+                  "Name": name,
+                  "Value": value,
+                  "Domain": "music.163.com",
+                  "Path": "/",
+                  "Secure": False,
+                  "HttpOnly": False,
+                  "Persistent": True,
+                  "HostOnly": False,
+                  "Expires": future,
+                  "Creation": now,
+                  "LastAccess": now,
+                  "SeqNum": seq
+              }
+          data = {
+              "music.163.com": {
+                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
+                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
+              }
+          }
+          with open("data/fan1.json", "w") as f:
+              json.dump(data, f)
+          PY
 
       - name: 生成小号2 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
           __CSRF: ${{ secrets.__CSRF_FAN2 }}
         run: |
-          echo -n "MUSIC_U=${MUSIC_U}; __csrf=${__CSRF};" > data/fan2.json
+          python3 - <<'PY'
+          import json, os, datetime
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          future = "2099-12-31T23:59:59Z"
+          def entry(name, value, seq):
+              return {
+                  "Name": name,
+                  "Value": value,
+                  "Domain": "music.163.com",
+                  "Path": "/",
+                  "Secure": False,
+                  "HttpOnly": False,
+                  "Persistent": True,
+                  "HostOnly": False,
+                  "Expires": future,
+                  "Creation": now,
+                  "LastAccess": now,
+                  "SeqNum": seq
+              }
+          data = {
+              "music.163.com": {
+                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
+                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
+              }
+          }
+          with open("data/fan2.json", "w") as f:
+              json.dump(data, f)
+          PY
 
       - name: 运行批量任务
         run: |
