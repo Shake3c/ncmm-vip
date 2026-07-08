@@ -39,107 +39,39 @@ jobs:
       - name: 准备工作目录
         run: mkdir -p data
 
-      - name: 生成主账号 Cookie 文件
+      - name: 生成 Cookie 文本文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U }}
           __CSRF: ${{ secrets.__CSRF }}
+          MUSIC_U_FAN1: ${{ secrets.MUSIC_U_FAN1 }}
+          __CSRF_FAN1: ${{ secrets.__CSRF_FAN1 }}
+          MUSIC_U_FAN2: ${{ secrets.MUSIC_U_FAN2 }}
+          __CSRF_FAN2: ${{ secrets.__CSRF_FAN2 }}
         run: |
-          python3 - <<'PY'
-          import json, os, datetime
-          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-          future = "2099-12-31T23:59:59Z"
-          def entry(name, value, seq):
-              return {
-                  "Name": name,
-                  "Value": value,
-                  "Domain": "music.163.com",
-                  "Path": "/",
-                  "Secure": False,
-                  "HttpOnly": False,
-                  "Persistent": True,
-                  "HostOnly": False,
-                  "Expires": future,
-                  "Creation": now,
-                  "LastAccess": now,
-                  "SeqNum": seq
-              }
-          data = {
-              "music.163.com": {
-                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
-                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
-              }
-          }
-          with open("data/cookie.json", "w") as f:
-              json.dump(data, f)
-          PY
+          echo "MUSIC_U=${MUSIC_U}; __csrf=${__CSRF};" > data/cookie.txt
+          echo "MUSIC_U=${MUSIC_U_FAN1}; __csrf=${__CSRF_FAN1};" > data/fan1.txt
+          echo "MUSIC_U=${MUSIC_U_FAN2}; __csrf=${__CSRF_FAN2};" > data/fan2.txt
 
-      - name: 生成小号1 Cookie 文件
-        env:
-          MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
-          __CSRF: ${{ secrets.__CSRF_FAN1 }}
+      - name: 用 v1.1.7 转换主账号 Cookie 为标准格式
         run: |
-          python3 - <<'PY'
-          import json, os, datetime
-          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-          future = "2099-12-31T23:59:59Z"
-          def entry(name, value, seq):
-              return {
-                  "Name": name,
-                  "Value": value,
-                  "Domain": "music.163.com",
-                  "Path": "/",
-                  "Secure": False,
-                  "HttpOnly": False,
-                  "Persistent": True,
-                  "HostOnly": False,
-                  "Expires": future,
-                  "Creation": now,
-                  "LastAccess": now,
-                  "SeqNum": seq
-              }
-          data = {
-              "music.163.com": {
-                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
-                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
-              }
-          }
-          with open("data/fan1.json", "w") as f:
-              json.dump(data, f)
-          PY
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            ghcr.io/3899/ncmm:1.1.7 \
+            --home /data login cookie -f /data/cookie.txt -m -o /data/cookie.json
 
-      - name: 生成小号2 Cookie 文件
-        env:
-          MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
-          __CSRF: ${{ secrets.__CSRF_FAN2 }}
+      - name: 用 v1.1.7 转换小号1 Cookie 为标准格式
         run: |
-          python3 - <<'PY'
-          import json, os, datetime
-          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-          future = "2099-12-31T23:59:59Z"
-          def entry(name, value, seq):
-              return {
-                  "Name": name,
-                  "Value": value,
-                  "Domain": "music.163.com",
-                  "Path": "/",
-                  "Secure": False,
-                  "HttpOnly": False,
-                  "Persistent": True,
-                  "HostOnly": False,
-                  "Expires": future,
-                  "Creation": now,
-                  "LastAccess": now,
-                  "SeqNum": seq
-              }
-          data = {
-              "music.163.com": {
-                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
-                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
-              }
-          }
-          with open("data/fan2.json", "w") as f:
-              json.dump(data, f)
-          PY
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            ghcr.io/3899/ncmm:1.1.7 \
+            --home /data login cookie -f /data/fan1.txt -o /data/fan1.json
+
+      - name: 用 v1.1.7 转换小号2 Cookie 为标准格式
+        run: |
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            ghcr.io/3899/ncmm:1.1.7 \
+            --home /data login cookie -f /data/fan2.txt -o /data/fan2.json
 
       - name: 运行批量任务
         run: |
