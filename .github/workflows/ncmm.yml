@@ -16,38 +16,74 @@ jobs:
       - name: 准备工作目录
         run: mkdir -p data
 
-      - name: 导入主账号 Cookie
+      - name: 生成主账号 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U }}
           CSRF: ${{ secrets.__CSRF }}
         run: |
+          python3 -c "
+          import json, os
+          cookies = [
+            {'name': 'MUSIC_U', 'value': os.environ['MUSIC_U'], 'domain': 'music.163.com', 'path': '/'},
+            {'name': '__csrf', 'value': os.environ['CSRF'], 'domain': 'music.163.com', 'path': '/'}
+          ]
+          with open('cookie_main.json', 'w') as f:
+            json.dump(cookies, f)
+          "
+
+      - name: 导入主账号 Cookie
+        run: |
           docker run --rm \
             -v "$PWD/data:/data" \
+            -v "$PWD/cookie_main.json:/cookie_main.json" \
             ghcr.io/3899/ncmm:latest \
-            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF}" \
-            -m -o /data/cookie.json --home /data
+            login cookie -f /cookie_main.json --format json -m -o /data/cookie.json --home /data
 
-      - name: 导入小号1 Cookie
+      - name: 生成小号1 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
           CSRF: ${{ secrets.__CSRF_FAN1 }}
         run: |
+          python3 -c "
+          import json, os
+          cookies = [
+            {'name': 'MUSIC_U', 'value': os.environ['MUSIC_U'], 'domain': 'music.163.com', 'path': '/'},
+            {'name': '__csrf', 'value': os.environ['CSRF'], 'domain': 'music.163.com', 'path': '/'}
+          ]
+          with open('cookie_fan1.json', 'w') as f:
+            json.dump(cookies, f)
+          "
+
+      - name: 导入小号1 Cookie
+        run: |
           docker run --rm \
             -v "$PWD/data:/data" \
+            -v "$PWD/cookie_fan1.json:/cookie_fan1.json" \
             ghcr.io/3899/ncmm:latest \
-            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF}" \
-            -m -o /data/fan1.json --home /data
+            login cookie -f /cookie_fan1.json --format json -o /data/fan1.json --home /data
 
-      - name: 导入小号2 Cookie
+      - name: 生成小号2 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
           CSRF: ${{ secrets.__CSRF_FAN2 }}
         run: |
+          python3 -c "
+          import json, os
+          cookies = [
+            {'name': 'MUSIC_U', 'value': os.environ['MUSIC_U'], 'domain': 'music.163.com', 'path': '/'},
+            {'name': '__csrf', 'value': os.environ['CSRF'], 'domain': 'music.163.com', 'path': '/'}
+          ]
+          with open('cookie_fan2.json', 'w') as f:
+            json.dump(cookies, f)
+          "
+
+      - name: 导入小号2 Cookie
+        run: |
           docker run --rm \
             -v "$PWD/data:/data" \
+            -v "$PWD/cookie_fan2.json:/cookie_fan2.json" \
             ghcr.io/3899/ncmm:latest \
-            login cookie "MUSIC_U=${MUSIC_U}; __csrf=${CSRF}" \
-            -m -o /data/fan2.json --home /data
+            login cookie -f /cookie_fan2.json --format json -o /data/fan2.json --home /data
 
       - name: 运行批量任务
         run: |
