@@ -6,8 +6,31 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+env:
+  # 每月 1 号到第 N 天自动运行，N 之后跳过。不需要每月改文件。
+  RUN_UNTIL_DAY: '5'
+
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      continue: ${{ steps.date.outputs.continue }}
+    steps:
+      - name: 检查运行窗口
+        id: date
+        run: |
+          TODAY=$(date -u +%d)
+          if [ "$TODAY" -gt "$RUN_UNTIL_DAY" ]; then
+            echo "已过本月运行日期（1-$RUN_UNTIL_DAY 日），今日跳过"
+            echo "continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "继续运行"
+            echo "continue=true" >> $GITHUB_OUTPUT
+          fi
+
   ncmm:
+    needs: check
+    if: ${{ needs.check.outputs.continue == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 配置
@@ -19,76 +42,112 @@ jobs:
       - name: 生成主账号 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U }}
-          CSRF: ${{ secrets.__CSRF }}
+          __CSRF: ${{ secrets.__CSRF }}
         run: |
-          python3 -c "
-          import json, os
-          cookies = [
-            {'name': 'MUSIC_U', 'value': os.environ['MUSIC_U'], 'domain': 'music.163.com', 'path': '/'},
-            {'name': '__csrf', 'value': os.environ['CSRF'], 'domain': 'music.163.com', 'path': '/'}
-          ]
-          with open('cookie_main.json', 'w') as f:
-            json.dump(cookies, f)
-          "
-
-      - name: 导入主账号 Cookie
-        run: |
-          docker run --rm \
-            -v "$PWD/data:/data" \
-            -v "$PWD/cookie_main.json:/cookie_main.json" \
-            ghcr.io/3899/ncmm:latest \
-            login cookie -f /cookie_main.json --format json -m -o /data/cookie.json --home /data
+          python3 - <<'PY'
+          import json, os, datetime
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          future = "2099-12-31T23:59:59Z"
+          def entry(name, value, seq):
+              return {
+                  "Name": name,
+                  "Value": value,
+                  "Domain": ".music.163.com",
+                  "Path": "/",
+                  "SameSite": "",
+                  "Secure": False,
+                  "HttpOnly": False,
+                  "Persistent": True,
+                  "HostOnly": False,
+                  "Expires": future,
+                  "Creation": now,
+                  "LastAccess": now,
+                  "SeqNum": seq
+              }
+          data = {
+              "music.163.com": {
+                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
+                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
+              }
+          }
+          with open("data/cookie.json", "w") as f:
+              json.dump(data, f)
+          PY
 
       - name: 生成小号1 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
-          CSRF: ${{ secrets.__CSRF_FAN1 }}
+          __CSRF: ${{ secrets.__CSRF_FAN1 }}
         run: |
-          python3 -c "
-          import json, os
-          cookies = [
-            {'name': 'MUSIC_U', 'value': os.environ['MUSIC_U'], 'domain': 'music.163.com', 'path': '/'},
-            {'name': '__csrf', 'value': os.environ['CSRF'], 'domain': 'music.163.com', 'path': '/'}
-          ]
-          with open('cookie_fan1.json', 'w') as f:
-            json.dump(cookies, f)
-          "
-
-      - name: 导入小号1 Cookie
-        run: |
-          docker run --rm \
-            -v "$PWD/data:/data" \
-            -v "$PWD/cookie_fan1.json:/cookie_fan1.json" \
-            ghcr.io/3899/ncmm:latest \
-            login cookie -f /cookie_fan1.json --format json -o /data/fan1.json --home /data
+          python3 - <<'PY'
+          import json, os, datetime
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          future = "2099-12-31T23:59:59Z"
+          def entry(name, value, seq):
+              return {
+                  "Name": name,
+                  "Value": value,
+                  "Domain": ".music.163.com",
+                  "Path": "/",
+                  "SameSite": "",
+                  "Secure": False,
+                  "HttpOnly": False,
+                  "Persistent": True,
+                  "HostOnly": False,
+                  "Expires": future,
+                  "Creation": now,
+                  "LastAccess": now,
+                  "SeqNum": seq
+              }
+          data = {
+              "music.163.com": {
+                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
+                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
+              }
+          }
+          with open("data/fan1.json", "w") as f:
+              json.dump(data, f)
+          PY
 
       - name: 生成小号2 Cookie 文件
         env:
           MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
-          CSRF: ${{ secrets.__CSRF_FAN2 }}
+          __CSRF: ${{ secrets.__CSRF_FAN2 }}
         run: |
-          python3 -c "
-          import json, os
-          cookies = [
-            {'name': 'MUSIC_U', 'value': os.environ['MUSIC_U'], 'domain': 'music.163.com', 'path': '/'},
-            {'name': '__csrf', 'value': os.environ['CSRF'], 'domain': 'music.163.com', 'path': '/'}
-          ]
-          with open('cookie_fan2.json', 'w') as f:
-            json.dump(cookies, f)
-          "
-
-      - name: 导入小号2 Cookie
-        run: |
-          docker run --rm \
-            -v "$PWD/data:/data" \
-            -v "$PWD/cookie_fan2.json:/cookie_fan2.json" \
-            ghcr.io/3899/ncmm:latest \
-            login cookie -f /cookie_fan2.json --format json -o /data/fan2.json --home /data
+          python3 - <<'PY'
+          import json, os, datetime
+          now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+          future = "2099-12-31T23:59:59Z"
+          def entry(name, value, seq):
+              return {
+                  "Name": name,
+                  "Value": value,
+                  "Domain": ".music.163.com",
+                  "Path": "/",
+                  "SameSite": "",
+                  "Secure": False,
+                  "HttpOnly": False,
+                  "Persistent": True,
+                  "HostOnly": False,
+                  "Expires": future,
+                  "Creation": now,
+                  "LastAccess": now,
+                  "SeqNum": seq
+              }
+          data = {
+              "music.163.com": {
+                  "MUSIC_U": entry("MUSIC_U", os.environ["MUSIC_U"], 1),
+                  "__csrf": entry("__csrf", os.environ["__CSRF"], 2)
+              }
+          }
+          with open("data/fan2.json", "w") as f:
+              json.dump(data, f)
+          PY
 
       - name: 运行批量任务
         run: |
           docker run --rm \
             -v "$PWD/data:/data" \
             -v "$PWD/config.yaml:/config.yaml" \
-            ghcr.io/3899/ncmm:latest \
+            ghcr.io/3899/ncmm:v1.1.8 \
             -c /config.yaml --home /data task
