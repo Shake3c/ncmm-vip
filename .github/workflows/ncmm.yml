@@ -149,5 +149,5 @@ jobs:
           docker run --rm \
             -v "$PWD/data:/data" \
             -v "$PWD/config.yaml:/config.yaml" \
-            3899/ncmm:v1.1.8 \
+            ghcr.io/3899/ncmm:1.1.8 \
             -c /config.yaml --home /data task
