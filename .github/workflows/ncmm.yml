@@ -36,42 +36,71 @@ jobs:
       - name: Checkout 配置
         uses: actions/checkout@v4
 
-      - name: 准备工作目录
+      - name: 准备数据目录
         run: mkdir -p data
 
-      - name: 生成 Cookie 文本文件
+      - name: 生成 Cookie 文件
         env:
-          MUSIC_U: ${{ secrets.MUSIC_U }}
-          __CSRF: ${{ secrets.__CSRF }}
-          MUSIC_U_FAN1: ${{ secrets.MUSIC_U_FAN1 }}
-          __CSRF_FAN1: ${{ secrets.__CSRF_FAN1 }}
-          MUSIC_U_FAN2: ${{ secrets.MUSIC_U_FAN2 }}
-          __CSRF_FAN2: ${{ secrets.__CSRF_FAN2 }}
+          MAIN_MUSIC_U: ${{ secrets.MUSIC_U }}
+          MAIN_CSRF: ${{ secrets.__CSRF }}
+          FAN1_MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
+          FAN1_CSRF: ${{ secrets.__CSRF_FAN1 }}
+          FAN2_MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
+          FAN2_CSRF: ${{ secrets.__CSRF_FAN2 }}
         run: |
-          echo "MUSIC_U=${MUSIC_U}; __csrf=${__CSRF};" > data/cookie.txt
-          echo "MUSIC_U=${MUSIC_U_FAN1}; __csrf=${__CSRF_FAN1};" > data/fan1.txt
-          echo "MUSIC_U=${MUSIC_U_FAN2}; __csrf=${__CSRF_FAN2};" > data/fan2.txt
+          python3 << 'PYEOF'
+          import json, os, datetime
 
-      - name: 用 v1.1.7 转换主账号 Cookie 为标准格式
-        run: |
-          docker run --rm \
-            -v "$PWD/data:/data" \
-            ghcr.io/3899/ncmm:1.1.7 \
-            --home /data login cookie -f /data/cookie.txt -m -o /data/cookie.json
+          def make_cookie_json(music_u, csrf):
+              now = datetime.datetime.now(datetime.timezone.utc)
+              expire = now + datetime.timedelta(days=180)
+              # Go 代码默认不设置 PublicSuffixList，jarKey 对 music.163.com 返回 163.com
+              return {
+                  "163.com": {
+                      "music.163.com;/;MUSIC_U": {
+                          "Name": "MUSIC_U",
+                          "Value": music_u,
+                          "Domain": "music.163.com",
+                          "Path": "/",
+                          "SameSite": "",
+                          "Secure": True,
+                          "HttpOnly": True,
+                          "Persistent": True,
+                          "HostOnly": False,
+                          "Expires": expire.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "Creation": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "LastAccess": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "SeqNum": 0,
+                      },
+                      "music.163.com;/;__csrf": {
+                          "Name": "__csrf",
+                          "Value": csrf,
+                          "Domain": "music.163.com",
+                          "Path": "/",
+                          "SameSite": "",
+                          "Secure": False,
+                          "HttpOnly": False,
+                          "Persistent": True,
+                          "HostOnly": False,
+                          "Expires": expire.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "Creation": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "LastAccess": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "SeqNum": 1,
+                      },
+                  }
+              }
 
-      - name: 用 v1.1.7 转换小号1 Cookie 为标准格式
-        run: |
-          docker run --rm \
-            -v "$PWD/data:/data" \
-            ghcr.io/3899/ncmm:1.1.7 \
-            --home /data login cookie -f /data/fan1.txt -o /data/fan1.json
+          def write(path, music_u, csrf):
+              if not music_u or not csrf:
+                  raise SystemExit(f"缺少账号凭证：{path}")
+              with open(path, "w", encoding="utf-8") as f:
+                  json.dump(make_cookie_json(music_u, csrf), f, ensure_ascii=False, indent=2)
 
-      - name: 用 v1.1.7 转换小号2 Cookie 为标准格式
-        run: |
-          docker run --rm \
-            -v "$PWD/data:/data" \
-            ghcr.io/3899/ncmm:1.1.7 \
-            --home /data login cookie -f /data/fan2.txt -o /data/fan2.json
+          write("data/cookie.json", os.environ["MAIN_MUSIC_U"], os.environ["MAIN_CSRF"])
+          write("data/fan1.json", os.environ["FAN1_MUSIC_U"], os.environ["FAN1_CSRF"])
+          write("data/fan2.json", os.environ["FAN2_MUSIC_U"], os.environ["FAN2_CSRF"])
+          print("Cookie 文件已生成")
+          PYEOF
 
       - name: 运行批量任务
         run: |
