@@ -40,7 +40,7 @@ playids:
   run_max: 0
   gap_min: 3
   gap_max: 5
-  ids: ""              # 替换为你自己的歌曲 ID，例如："1863223323,1958473321"
+  ids: "2732514039,2732559494"              # 替换为你自己的歌曲 ID，例如："1863223323,1958473321"
   idsFile: ""
   enableMain: false     # 大号不直接刷 playids，只在 musician-vip 中完成播放量
   enableSecondaries: true
