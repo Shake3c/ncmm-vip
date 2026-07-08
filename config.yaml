@@ -2,9 +2,12 @@ version: 1.0
 
 # 账号配置
 # 工作流会在运行时使用 ncmm login 命令把 Secrets 写入 /data/cookie.json
+# 小号 Cookie 写入 /data/fan1.json /data/fan2.json
 accounts:
   main: "/data/cookie.json"
-  secondary: []
+  secondary:
+    - "/data/fan1.json"
+    - "/data/fan2.json"
 
 log:
   app: ncm
@@ -29,18 +32,18 @@ database:
   path: "/data/badger"
 
 # 播放配置
-# 请将 ids 替换为你自己发布的歌曲 ID，多个用逗号分隔
+# 3 个账号每天共 150-180 首，4-5 天完成 650 次，单次运行约 3-4 小时
 playids:
-  daily_min: 30
-  daily_max: 80
+  daily_min: 50
+  daily_max: 60
   run_min: 0
   run_max: 0
-  gap_min: 15
-  gap_max: 45
-  ids: "2732559494,2732514039"              # 示例："1863223323,1958473321,2023341122"
+  gap_min: 3
+  gap_max: 5
+  ids: ""              # 示例："1863223323,1958473321,2023341122"
   idsFile: ""
-  enableMain: true      # 单账号部署时开启主账号播放
-  enableSecondaries: false
+  enableMain: false     # 大号不刷播放，避免风控
+  enableSecondaries: true
 
 # 签到任务
 sign:
@@ -72,9 +75,10 @@ fansgroup:
   enableSecondaries: false
 
 # 混听风控干扰
+# 为了快速完成播放量，关闭日推混听
 mixPlay:
-  enabled: true
-  dailyRecommendRatio: 0.3
+  enabled: false
+  dailyRecommendRatio: 0.0
   countTarget: false
 
 # 图文笔记配置
@@ -102,7 +106,7 @@ musician:
   enableVipNote: true   # 进阶任务中自动发布笔记
   enableVipPlay: true   # 进阶任务中自动完成播放量
   play:
-    ids: "2732559494,2732514039"             # 示例："1863223323,1958473321,2023341122"
+    ids: ""             # 示例："1863223323,1958473321,2023341122"
     idsFile: ""
     run_min: 0
     run_max: 0
