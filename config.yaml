@@ -1,8 +1,7 @@
 version: 1.0
 
 # 账号配置
-# 工作流会在运行时使用 ncmm login 命令把 Secrets 写入 /data/cookie.json
-# 小号 Cookie 写入 /data/fan1.json /data/fan2.json
+# 工作流会直接把 Secrets 写入 /data/cookie.json /data/fan1.json /data/fan2.json
 accounts:
   main: "/data/cookie.json"
   secondary:
@@ -27,22 +26,23 @@ network:
   timeout: 60s
   retry: 3
 
+# 本地数据存储
 database:
   driver: badger
   path: "/data/badger"
 
 # 播放配置
-# 3 个账号每天共 150-180 首，4-5 天完成 650 次，单次运行约 3-4 小时
+# 3 个账号每天共 300-360 首，2-3 天完成 650 次播放任务，单次运行约 3-4 小时
 playids:
-  daily_min: 50
-  daily_max: 60
+  daily_min: 100
+  daily_max: 120
   run_min: 0
   run_max: 0
   gap_min: 3
   gap_max: 5
-  ids: "2732514039,2732559494"              # 示例："1863223323,1958473321,2023341122"
+  ids: ""              # 替换为你自己的歌曲 ID，例如："1863223323,1958473321"
   idsFile: ""
-  enableMain: false     # 大号不刷播放，避免风控
+  enableMain: false     # 大号不直接刷 playids，只在 musician-vip 中完成播放量
   enableSecondaries: true
 
 # 签到任务
@@ -106,7 +106,7 @@ musician:
   enableVipNote: true   # 进阶任务中自动发布笔记
   enableVipPlay: true   # 进阶任务中自动完成播放量
   play:
-    ids: "2732514039,2732559494"             # 示例："1863223323,1958473321,2023341122"
+    ids: ""             # 留空则继承 playids.ids
     idsFile: ""
     run_min: 0
     run_max: 0
