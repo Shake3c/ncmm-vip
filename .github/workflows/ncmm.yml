@@ -8,7 +8,7 @@ on:
 
 env:
   # 每月 1 号到第 N 天自动运行，N 之后跳过。不需要每月改文件。
-  RUN_UNTIL_DAY: '5'
+  RUN_UNTIL_DAY: '15'
 
 jobs:
   check:
