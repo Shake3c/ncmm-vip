@@ -43,7 +43,7 @@ playids:
   ids: "2732514039,2732559494"              # 替换为你自己的歌曲 ID，例如："1863223323,1958473321"
   idsFile: ""
   enableMain: false     # 大号不直接刷 playids，只在 musician-vip 中完成播放量
-  enableSecondaries: true
+  enableSecondaries: false
 
 # 签到任务
 sign:
@@ -64,7 +64,7 @@ sign:
 # 批量任务入口配置
 task:
   sign: true
-  playids: true
+  playids: false
   musician-sign: true
   musician-vip: true    # 黑胶 VIP 进阶任务（发布笔记 + 播放量）
   note: false
@@ -104,7 +104,7 @@ musician:
   enableSecondaries: false
   identityCacheDays: 0
   enableVipNote: true   # 进阶任务中自动发布笔记
-  enableVipPlay: true   # 进阶任务中自动完成播放量
+  enableVipPlay: false   # 播放量已够，关闭自动刷播放
   play:
     ids: ""             # 留空则继承 playids.ids
     idsFile: ""
