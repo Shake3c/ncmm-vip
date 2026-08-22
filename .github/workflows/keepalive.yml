@@ -1,0 +1,33 @@
+name: Keepalive
+
+on:
+  schedule:
+    # 每月 1 号 03:00 UTC（北京时间 11:00）自动提交时间戳，保持仓库活跃，
+    # 避免 GitHub 因 60 天无活动自动停用定时工作流
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 更新保活时间戳
+        run: date -u +"%Y-%m-%d %H:%M:%S UTC" > keepalive.txt
+
+      - name: 提交并推送
+        run: |
+          git config user.name "keepalive-bot"
+          git config user.email "keepalive-bot@users.noreply.github.com"
+          git add keepalive.txt
+          if git diff --cached --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git commit -m "chore: keepalive $(date -u +%Y-%m-%d)"
+            git push
+          fi
