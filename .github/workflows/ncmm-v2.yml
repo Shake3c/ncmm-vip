@@ -1,0 +1,87 @@
+name: ncmm v2 (网易云 VIP 自动化)
+
+on:
+  schedule:
+    # 每天 UTC 02:00（北京时间 10:00）
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  ncmm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 准备数据目录
+        run: mkdir -p data
+
+      - name: 生成 Cookie 文件
+        env:
+          MAIN_MUSIC_U: ${{ secrets.MUSIC_U }}
+          MAIN_CSRF: ${{ secrets.__CSRF }}
+          FAN1_MUSIC_U: ${{ secrets.MUSIC_U_FAN1 }}
+          FAN1_CSRF: ${{ secrets.__CSRF_FAN1 }}
+          FAN2_MUSIC_U: ${{ secrets.MUSIC_U_FAN2 }}
+          FAN2_CSRF: ${{ secrets.__CSRF_FAN2 }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, datetime
+
+          def make_cookie_json(music_u, csrf):
+              now = datetime.datetime.now(datetime.timezone.utc)
+              expire = now + datetime.timedelta(days=180)
+              return {
+                  "163.com": {
+                      "music.163.com;/;MUSIC_U": {
+                          "Name": "MUSIC_U",
+                          "Value": music_u,
+                          "Domain": "music.163.com",
+                          "Path": "/",
+                          "SameSite": "",
+                          "Secure": True,
+                          "HttpOnly": True,
+                          "Persistent": True,
+                          "HostOnly": False,
+                          "Expires": expire.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "Creation": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "LastAccess": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "SeqNum": 0,
+                      },
+                      "music.163.com;/;__csrf": {
+                          "Name": "__csrf",
+                          "Value": csrf,
+                          "Domain": "music.163.com",
+                          "Path": "/",
+                          "SameSite": "",
+                          "Secure": False,
+                          "HttpOnly": False,
+                          "Persistent": True,
+                          "HostOnly": False,
+                          "Expires": expire.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "Creation": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "LastAccess": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                          "SeqNum": 1,
+                      },
+                  }
+              }
+
+          def write(path, music_u, csrf):
+              if not music_u or not csrf:
+                  raise SystemExit(f"缺少账号凭证：{path}")
+              with open(path, "w", encoding="utf-8") as f:
+                  json.dump(make_cookie_json(music_u, csrf), f, ensure_ascii=False, indent=2)
+
+          write("data/cookie.json", os.environ["MAIN_MUSIC_U"], os.environ["MAIN_CSRF"])
+          write("data/fan1.json", os.environ["FAN1_MUSIC_U"], os.environ["FAN1_CSRF"])
+          write("data/fan2.json", os.environ["FAN2_MUSIC_U"], os.environ["FAN2_CSRF"])
+          print("Cookie 文件已生成")
+          PYEOF
+
+      - name: 运行 ncmm v1.2.9 批量任务
+        run: |
+          docker run --rm \
+            -v "$PWD/data:/data" \
+            -v "$PWD/config-v2.yaml:/config.yaml" \
+            ghcr.io/3899/ncmm:1.2.9 \
+            -c /config.yaml --home /data task
