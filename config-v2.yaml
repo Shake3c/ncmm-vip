@@ -42,7 +42,7 @@ task:
   # 在批量执行中包含日常一键签到。
   sign: true
   # 在批量执行中包含指定歌曲播放。
-  playids: false
+  playids: true
   # 在批量执行中包含音乐人每日签到与云豆领取。
   musician-sign: true
   # 在批量执行中包含音乐人 VIP 月度进阶，可能耗时较长。
@@ -129,24 +129,21 @@ playids:
   enableSecondaries: true
 
   # 每日首次运行时在上下限间生成当日随机目标，单位：首。
-  daily_min: 80
-  daily_max: 200
+  daily_min: 40
+  daily_max: 60
   # 每次运行在上下限间生成本次目标；run_min=0 表示不限制最低数量。
-  run_min: 40
-  run_max: 80
+  run_min: 20
+  run_max: 40
   # 两首歌曲之间的随机等待范围，单位：秒。
   gap_min: 0
   gap_max: 5
 
   # 歌单订阅：支持填写网易云歌单 ID 或链接，程序将自动提取歌单中的所有歌曲并去重合并
-  playlistIds:
-    - "18425795840"
+  playlistIds: []
 
   # 歌曲 ID 使用英文逗号分隔；idsFile 支持本地文件和 HTTP/HTTPS 地址。
-  ids: "3366663042"
-  idsFile:
-    - "https://ncmm.cc.cd/34p793j2"
-    # - "./ids.txt"
+  ids: "3403422053,3403422317,3403414063,2732514039,2732559494"
+  idsFile: []
 
 # 日推混听。在指定歌曲中穿插每日推荐，降低播放行为单一性。
 mixPlay:
@@ -198,7 +195,7 @@ musician:
   # VIP 进阶任务自动复用 note 配置发布笔记。
   enableVipNote: true
   # VIP 进阶任务执行专属播放目标。
-  enableVipPlay: false
+  enableVipPlay: true
   # VIP 进阶任务完成且到达领取时间后自动领取黑胶 VIP（每月一次，需要 antiCheatToken）。
   enableVipClaim: true
 
