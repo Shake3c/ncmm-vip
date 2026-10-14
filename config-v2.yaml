@@ -278,7 +278,7 @@ vipMemberGift:
   # 辅助账号参与会员赠送与领取。
   enableSecondaries: true
   # 将可赠送的会员天数发布到云端互助服务（会消耗你自己的会员天数，按需开启）。
-  enableGift: true
+  enableGift: false
   # 辅助账号是否也发布赠送。默认 false：只让主账号赠送，避免小号的会员天数被消耗。
   enableGiftSecondaries: false
   # 从云端互助服务领取会员；不需要配置 antiCheatToken，每账号每月一次。
