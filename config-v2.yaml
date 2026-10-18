@@ -142,8 +142,8 @@ playids:
   playlistIds: []
 
   # 歌曲 ID 使用英文逗号分隔；idsFile 支持本地文件和 HTTP/HTTPS 地址。
-  ids: "3403422053,3403422317,3403414063,2732514039,2732559494"
-  idsFile: []
+  ids: ""
+  idsFile: "./ids.txt"
 
 # 日推混听。在指定歌曲中穿插每日推荐，降低播放行为单一性。
 mixPlay:
