@@ -78,6 +78,11 @@ jobs:
           print("Cookie 文件已生成")
           PYEOF
 
+      - name: 生成歌曲列表
+        env:
+          SONG_IDS: ${{ secrets.SONG_IDS }}
+        run: printf '%s' "$SONG_IDS" > data/ids.txt
+
       - name: 运行 ncmm v1.2.9 批量任务
         run: |
           docker run --rm \
