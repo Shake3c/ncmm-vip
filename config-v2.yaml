@@ -42,7 +42,7 @@ task:
   # 在批量执行中包含日常一键签到。
   sign: true
   # 在批量执行中包含指定歌曲播放。
-  playids: true
+  playids: false
   # 在批量执行中包含音乐人每日签到与云豆领取。
   musician-sign: true
   # 在批量执行中包含音乐人 VIP 月度进阶，可能耗时较长。
@@ -195,7 +195,7 @@ musician:
   # VIP 进阶任务自动复用 note 配置发布笔记。
   enableVipNote: true
   # VIP 进阶任务执行专属播放目标。
-  enableVipPlay: true
+  enableVipPlay: false
   # VIP 进阶任务完成且到达领取时间后自动领取黑胶 VIP（每月一次，需要 antiCheatToken）。
   enableVipClaim: true
 
